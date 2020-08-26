@@ -2,55 +2,62 @@ package Controllers
 
 import(
   "github.com/gin-gonic/gin"
-  DB "github.com/joaopedro489/BackGo/Database"
-  md "github.com/joaopedro489/BackGo/Models"
+  md "BackGo/Models"
+  "net/http"
+  "strconv"
 )
-
-func getAllPosts(c *gin.Context){
+type PostInput struct{
+   Title string `json:"title"`
+   Text string `json:"text"`
+}
+func GetAllPosts(c *gin.Context){
    var posts []md.Post
-   DB.DB.Find(&posts)
+   md.DB.Find(&posts)
    c.JSON(http.StatusOK, gin.H{"data" : posts})
 }
 
-func getPost(c *gin.Context){
-  var post []md.Post
-  if err := DB.DB.Where("id = ?", c.Param("id")).First(&post).Error; err != nil{
+func GetPost(c *gin.Context){
+  var post md.Post
+  if err := md.DB.Where("id = ?", c.Param("id")).First(&post).Error; err != nil{
     c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
     return
   }
   c.JSON(http.StatusOK, gin.H{"data" : post})
 }
 
-func createPost(c *gin.Context){
-    var postInput md.Post
-    if err := c.ShouldBindJSON(&postInput); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+func CreatePost(c *gin.Context){
     var post md.Post
-    post.createPost(postInput)
+    user_id,_ := strconv.Atoi(c.PostForm("user_id"));
+    userId := uint(user_id)
+    post = md.Post{Tilte: c.PostForm("title"), Text: c.PostForm("text"), User_id: userId}
+    md.DB.Create(&post)
+    md.DB.Save(&post)
     c.JSON(http.StatusOK, gin.H{"data": post})
 }
-func updatePost(c *gin.Context){
-    var post md.Post
-    if err := DB.DB.Where("id = ?", c.Param("id")).First(&post).Error; err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-        return
-    }
-    var postInput md.Post
-    if err := c.ShouldBindJSON(&postInput); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
-    post.UpdatePost(postInput)
-    c.JSON(http.StatusOK, gin.H{"data" : post})
+func UpdatePost(c *gin.Context){
+  var post md.Post
+  if err := md.DB.Where("id = ?", c.Param("id")).First(&post).Error; err != nil {
+    c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+    return
+  }
+
+  // Validate input
+  var input PostInput
+  if err := c.ShouldBindJSON(&input); err != nil {
+    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    return
+  }
+  md.DB.Model(&post).Updates(input)
+  c.JSON(http.StatusOK, gin.H{"data": post})
+
 }
-func deletePost(c *gin.Context){
+
+func DeletePost(c *gin.Context){
     var post md.Post
-    if err := DB.DB.Where("id = ?", c.Param("id")).First(&post).Error; err != nil {
+    if err := md.DB.Where("id = ?", c.Param("id")).First(&post).Error; err != nil {
        c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
        return
     }
-    post.deletePost();
+    md.DB.Unscoped().Delete(&post)
     c.JSON(http.StatusOK, gin.H{"data": "Deletado"})
 }
