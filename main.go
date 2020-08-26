@@ -12,15 +12,18 @@ func main() {
   router.Use(cors.Default())
   md.ConnectDatabase()
 
+  //CRUD de User + Funções de Relacionamento do User com Post
 	router.GET("/getAllUsers", controller.GetAllUsers)
   router.GET("/getUser/:id", controller.GetUser)
   router.GET("/getUserPosts/:id", controller.GetUserPosts)
-  router.POST("/UserPost/:id", controller.UserPost)
+  router.POST("/userPost/:id", controller.UserPost)
   router.POST("/createUser", controller.CreateUser)
   router.PUT("/updateUser/:id", controller.UpdateUser)
+  router.PUT("/userUpdatePost/:post_id/:user_id", controller.UserUpdatePost)
   router.DELETE("/deleteUser/:id", controller.DeleteUser)
-  router.DELETE("UserDeletePost/:post_id", controller.UserDeletePost)
+  router.DELETE("userDeletePost/:post_id/:user_id", controller.UserDeletePost)
 
+  //CRUD de Post
   router.GET("/getAllPosts", controller.GetAllPosts)
   router.GET("/getPost/:id", controller.GetPost)
   router.POST("/createPost", controller.CreatePost)

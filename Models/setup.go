@@ -10,7 +10,13 @@ func ConnectDatabase(){
   if err != nil {
   panic(err)
  }
+ //Checar se existe as tabelas e depois migrar
+ if(db.HasTable(&User{}) && db.HasTable(&Post{})){
+   db.DropTable(&Post{})
+   db.DropTable(&User{})
+ }
  db.AutoMigrate(&User{}, &Post{})
  db.Model(&Post{}).AddForeignKey("user_id", "users(id)", "CASCADE", "CASCADE")
+
  DB = db
 }

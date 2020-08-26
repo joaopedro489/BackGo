@@ -4,97 +4,84 @@ import(
   "github.com/gin-gonic/gin"
   md "BackGo/Models"
   "net/http"
-  "strconv"
 
 )
+//struct necessário para pegar o input no PUT
 type UserInput struct{
-   Name string `json:"name"`
-   Age int `json:"age"`
-   Email string `json:"email"`
-   Password string `json:"-" `
+   Name string `form:"name"`
+   Age int `form:"age"`
+   Email string `form:"email"`
+   Password string `form:"-" `
 }
 func GetAllUsers(c *gin.Context){
    var users []md.User
    md.DB.Find(&users)
    c.JSON(http.StatusOK, gin.H{"data" : users})
 }
-
 func GetUser(c *gin.Context){
   var user md.User
-  if err := md.DB.Where("id = ?", c.Param("id")).First(&user).Error; err != nil{
-    c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-    return
-  }
-  var posts []md.Post
-  ss := md.DB.Model(&user).Related(&posts)
-  c.JSON(http.StatusOK, gin.H{"data" : ss})
+  user.GetUser(c)
+  c.JSON(http.StatusOK, gin.H{"data" : user})
 }
-
 func CreateUser(c *gin.Context){
     var user md.User
-    age,_ := strconv.Atoi(c.PostForm("age"));
-    user = md.User{Name: c.PostForm("name"), Age: age, Email: c.PostForm("email"), Password: c.PostForm("password")}
-    md.DB.Create(&user)
-    md.DB.Save(&user)
-    c.JSON(http.StatusOK, gin.H{"data" : user})
+    c.JSON(http.StatusOK, gin.H{"data" : user.CreateUser(c)})
 }
-
 func UpdateUser(c *gin.Context){
   var user md.User
-  if err := md.DB.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
-    c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-    return
-  }
-
+  user.GetUser(c)
   // Validate input
   var input UserInput
-  if err := c.ShouldBindJSON(&input); err != nil {
+  if err := c.ShouldBindQuery(&input); err != nil {
     c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
     return
   }
-  md.DB.Model(&user).Updates(input)
+  user.UpdateUser(input)
   c.JSON(http.StatusOK, gin.H{"data": user})
 
 }
-
 func DeleteUser(c *gin.Context){
     var user md.User
-    if err := md.DB.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
-       c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-       return
-    }
-    md.DB.Unscoped().Delete(&user)
+    user.GetUser(c)
+    user.DeleteUser()
     c.JSON(http.StatusOK, gin.H{"data": "Deletado"})
 }
 
 func UserPost(c *gin.Context){
     var user md.User
     var post md.Post
-    if err := md.DB.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
-       c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-       return
-    }
-    post = md.Post{Tilte: c.PostForm("title"), Text: c.PostForm("text"), User_id: user.ID}
-    md.DB.Create(&post)
-    md.DB.Save(&post)
-    c.JSON(http.StatusOK, gin.H{"user": user,"post": post})
+    user.GetUser(c)
+    var user_id uint = uint(user.ID)
+    c.JSON(http.StatusOK, gin.H{"user": user,"post": post.CreatePost(c, user_id)})
 }
 func GetUserPosts(c *gin.Context){
   var user md.User
   var posts []md.Post
-  if err := md.DB.Where("id = ?", c.Param("id")).First(&user).Error; err != nil {
-     c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-     return
-  }
-  md.DB.Where("user_id=?", user.ID).Find(&posts)
+  user.GetUser(c)
+  user.GetPosts(&posts)
   c.JSON(http.StatusOK, gin.H{"user": user,"posts": posts})
 }
 func UserDeletePost(c *gin.Context){
   var post md.Post
-  if err := md.DB.Where("id = ?", c.Param("post_id")).First(&post).Error; err != nil {
-     c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-     return
+  var user md.User
+  post.GetPost(c)
+  user.GetUser(c)
+  post.DeletePost()
+  var posts []md.Post
+  user.GetPosts(&posts)
+  c.JSON(http.StatusOK, gin.H{"user": user,"posts": posts})
+}
+func UserUpdatePost(c *gin.Context){
+  var post md.Post
+  var postInput PostInput
+  var user md.User
+  post.GetPost(c)
+  user.GetUser(c)
+  if err := c.ShouldBindQuery(&postInput); err != nil {
+    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    return
   }
-  md.DB.Delete(&post)
-  c.JSON(http.StatusOK, gin.H{"data": "Deletado"})
+  post.UpdatePost(postInput)
+  c.JSON(http.StatusOK, gin.H{"user": user,"post": post})
+
 }
