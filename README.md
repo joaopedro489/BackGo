@@ -33,3 +33,16 @@ Após a aplicação já estar servindo com o comando `go run main.go` será poss
 
 #### Quase todas rotas podem ser utilizadas normalmente pelo Postman, os dados que serão mandadados para rota PUT precisarão ser mandados por query, isto é usando o Params para mandar os dados pela URL. E o Post precisa ser mandado por Form-data
 #### Não tem restrições para criar uma entidade, isto é se quiser poderá só mandar o nome para criação de um user
+
+Atributos para serem considerados para o teste, usar em rotas de Post e Put:
+
+Atributos de User
+*name
+*email
+*age
+*password
+
+Atributos de Post
+*title
+*text
+*user_id (necessário se usar a rota creteaPost
