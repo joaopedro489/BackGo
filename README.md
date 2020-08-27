@@ -45,4 +45,4 @@ Atributos de User
 Atributos de Post
 * title
 * text
-* user_id (necessário se usar a rota creteaPost)
+* user_id (necessário se usar a rota cretePost)
