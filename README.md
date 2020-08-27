@@ -37,12 +37,12 @@ Após a aplicação já estar servindo com o comando `go run main.go` será poss
 Atributos para serem considerados para o teste, usar em rotas de Post e Put:
 
 Atributos de User
-*name
-*email
-*age
-*password
+* name
+* email
+* age
+* password
 
 Atributos de Post
-*title
-*text
-*user_id (necessário se usar a rota creteaPost
+* title
+* text
+* user_id (necessário se usar a rota creteaPost
