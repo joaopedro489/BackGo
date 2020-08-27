@@ -9,6 +9,7 @@ import (
 
 func main() {
 	router := gin.Default()
+  //exemplo de como usar middlewares, no caso com CORS
   router.Use(cors.Default())
   md.ConnectDatabase()
 

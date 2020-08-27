@@ -8,7 +8,7 @@ import (
 //atributos que irão para o BD com softDelete
 type Post struct{
   gorm.Model
-  Tilte string `json:"title"`
+  Title string `json:"title"`
   Text string `json:"text"`
   User_id uint `json:"user_id"`
 }
@@ -23,7 +23,7 @@ func (post *Post) GetPost(c *gin.Context){
   }
 }
 func (post Post) CreatePost(c *gin.Context, user_id uint) Post{
-  post = Post{Tilte: c.PostForm("title"), Text: c.PostForm("text"), User_id: user_id}
+  post = Post{Title: c.PostForm("title"), Text: c.PostForm("text"), User_id: user_id}
   DB.Create(&post)
   DB.Save(&post)
   return post

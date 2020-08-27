@@ -38,7 +38,6 @@ func UpdateUser(c *gin.Context){
   }
   user.UpdateUser(input)
   c.JSON(http.StatusOK, gin.H{"data": user})
-
 }
 func DeleteUser(c *gin.Context){
     var user md.User
